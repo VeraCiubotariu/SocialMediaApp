@@ -21,14 +21,13 @@ public class UserService {
 
     /**
      * adds the user to the network
+     *
      * @param u must not be null
      * @return null, if the user was added, u otherwise
-     * @throws ValidationException
-     *              if the entity is not valid
-     * @throws IllegalArgumentException
-     *              if the given entity is null.
+     * @throws ValidationException      if the entity is not valid
+     * @throws IllegalArgumentException if the given entity is null.
      */
-    public User addUser(User u) {
+    public Optional<User> addUser(User u) {
         return this.userRepo.save(u);
     }
 
@@ -40,66 +39,74 @@ public class UserService {
      *       if the given id is null.
      */
     public User deleteUser(Long id){
-        User u = this.userRepo.delete(id);
+        Optional<User> u = this.userRepo.findOne(id);
 
-        if(u != null){
-            List<User> friends = u.getFriends();
+        if(u.isPresent()){
+            List<User> friends = u.get().getFriends();
             while(!friends.isEmpty()){
-                this.deleteFriend(u, friends.get(0));
+                this.deleteFriend(u.get().getId(), friends.get(0).getId());
             }
+
+        //    friends.forEach(x -> deleteFriend(u.get().getId(), x.getId()));
+
+            return this.userRepo.delete(id).get();
         }
 
-        return u;
+        return null;
     }
 
     /**
      * adds the given friend to the given user's friends list
-     * @param user must not be null
-     * @param friend must not be null
+     * @param userId must not be null
+     * @param friendId must not be null
      * @return null, if the friend was added successfully
-     *         friend, otherwise
+     *         friendId, otherwise
      * @throws IllegalArgumentException, if user or friend is null
-     * @throws ValidationException, if either user is not valid
      */
-    public User addFriend(User user, User friend){
-        if(user == null){
+    public Long addFriend(Long userId, Long friendId){
+        if(userId == null || friendId == null){
             throw new IllegalArgumentException("null user!");
         }
 
-        if(this.userRepo.findOne(user.getId()) == null || this.userRepo.findOne(friend.getId()) == null){
-            return friend;
+        Optional<User> user = this.userRepo.findOne(userId);
+        Optional<User> friend = this.userRepo.findOne(friendId);
+
+        if(user.isEmpty() || friend.isEmpty()){
+            return friendId;
         }
 
-        if(friend.addFriend(user) == null && user.addFriend(friend) == null){
-            this.friendshipRepo.save(new Friendship(user, friend));
+        if(friend.get().addFriend(user.get()) == null && user.get().addFriend(friend.get()) == null){
+            this.friendshipRepo.save(new Friendship(user.get(), friend.get()));
             return null;
         }
 
-        return friend;
+        return friendId;
     }
 
     /**
      * removes the given friend from the given user's friends list
-     * @param user must not be null
-     * @param friend must not be null
+     * @param userId must not be null
+     * @param friendId must not be null
      * @return friend, if the friend was deleted successfully
      *         null, otherwise
      * @throws IllegalArgumentException if user or friend is null
-     * @throws ValidationException if either user is not valid
      */
-    public User deleteFriend(User user, User friend){
-        if(user == null){
+    public User deleteFriend(Long userId, Long friendId){
+        if(userId == null || friendId == null){
             throw new IllegalArgumentException("null user!");
         }
 
-        if(this.userRepo.findOne(user.getId()) == null || this.userRepo.findOne(friend.getId()) == null){
+        Optional<User> user = this.userRepo.findOne(userId);
+        Optional<User> friend = this.userRepo.findOne(friendId);
+
+        if(user.isEmpty() || friend.isEmpty()){
             return null;
         }
 
-        friendshipRepo.delete(new Tuple<Long, Long>(Long.min(user.getId(), friend.getId()), Long.max(user.getId(), friend.getId())));
+        friendshipRepo.delete(new Tuple<Long, Long>(Long.min(userId, friendId), Long.max(userId, friendId)));
 
-        friend.deleteFriend(user);
-        return user.deleteFriend(friend);
+        friend.get().deleteFriend(user.get());
+        return user.get().deleteFriend(friend.get());
     }
 
     /**
@@ -110,7 +117,13 @@ public class UserService {
         return this.userRepo.findAll();
     }
 
-    public User getUser(Long id){
+    /**
+     * returns the user with the given ID
+     * @param id must not be null
+     * @return an Optional encapsulating the entity with the given id
+     * @throws IllegalArgumentException if the given id is null
+     */
+    public Optional<User> getUser(Long id) throws IllegalArgumentException{
         return this.userRepo.findOne(id);
     }
 
@@ -196,11 +209,13 @@ public class UserService {
         int maxDistVertex = 0;
 
         for(int node = 0;node<V;node++){
-            if(!visited[node]){
-                dfs(node, V, visited, matAd, distance);
-                if(distance[node] > maxDistance){
-                    maxDistance = distance[node];
-                    maxDistVertex = node;
+            Arrays.fill(visited, false);
+            dfs(node, V, visited, matAd, distance);
+
+            for(int i=0;i<V;i++){
+                if(distance[i] > maxDistance){
+                    maxDistance = distance[i];
+                    maxDistVertex = i;
                 }
             }
         }
@@ -210,13 +225,14 @@ public class UserService {
         getCommunity(maxDistVertex, V, visited, matAd, comVert);
 
         List<User> community = new ArrayList<>();
-        for(Integer code:comVert){
-            for(Map.Entry<Long, Integer> entry:vertices.entrySet()){
-                if(Objects.equals(entry.getValue(), code)){
-                    community.add(userRepo.findOne(entry.getKey()));
+
+        comVert.forEach(code -> {
+            vertices.forEach((key, val) -> {
+                if(Objects.equals(val, code)){
+                    userRepo.findOne(key).ifPresent(community::add);
                 }
-            }
-        }
+            });
+        });
 
         return community;
     }

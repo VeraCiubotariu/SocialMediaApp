@@ -35,12 +35,12 @@ public class Main {
         serv.addUser(u5);
         serv.addUser(u6);
         serv.addUser(u7);
-        serv.deleteUser(2l);
-        serv.addFriend(u1, u5);
-        serv.addFriend(u2, u5);
-        serv.addFriend(u1, u7);
-    //    serv.deleteFriend(u5,u1);
-    //    serv.deleteUser(0l);
+        serv.deleteUser(2L);
+        serv.addFriend(0L, 4L);
+        serv.addFriend(1L, 4L);
+        serv.addFriend(0L, 6L);
+    //    serv.deleteFriend(4L,0L);
+    //    serv.deleteUser(0L);
 
         Iterable<User> users = serv.getAllUsers();
         users.forEach(System.out::println);

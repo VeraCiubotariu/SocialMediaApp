@@ -6,6 +6,7 @@ import ir.map.gr222.service.UserService;
 
 import java.security.Provider;
 import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
 
 public class UI {
@@ -77,7 +78,7 @@ public class UI {
 
         User user = new User(firstName, lastName);
         try{
-            if(this.serv.addUser(user) == null){
+            if(this.serv.addUser(user).isEmpty()){
                 System.out.println("user added successfully!");
             }
 
@@ -116,15 +117,10 @@ public class UI {
         System.out.println("Input the friend's ID: ");
         Long friendId = sc.nextLong();
 
-        try{
-            User user = this.serv.getUser(userId);
-            User friend = this.serv.getUser(friendId);
-
-            if(this.serv.addFriend(user, friend)==null){
+        try {
+            if (this.serv.addFriend(userId, friendId) == null) {
                 System.out.println("Friend added successfully!");
-            }
-
-            else{
+            } else {
                 System.out.println("Couldn't add friend!");
             }
         }
@@ -141,10 +137,8 @@ public class UI {
         Long friendId = sc.nextLong();
 
         try{
-            User user = this.serv.getUser(userId);
-            User friend = this.serv.getUser(friendId);
 
-            if(this.serv.deleteFriend(user, friend)!=null){
+            if(this.serv.deleteFriend(userId, friendId)!=null){
                 System.out.println("Friend deleted successfully!");
             }
 
