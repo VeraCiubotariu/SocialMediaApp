@@ -4,12 +4,11 @@ package ir.map.gr222.domain;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 
 public class User extends Entity<Long> {
     private String firstName;
     private String lastName;
-    private List<User> friends = new ArrayList<>();
+    private final List<User> friends = new ArrayList<>();
 
     private static long generatedId = 0;
 
@@ -89,15 +88,14 @@ public class User extends Entity<Long> {
                 "id='" + id + '\'' +
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
-                ", friends=" + friends.size() +
+            //    ", friends=" + friends.size() +
                 '}';
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof User)) return false;
-        User that = (User) o;
+        if (!(o instanceof User that)) return false;
         return getFirstName().equals(that.getFirstName()) &&
                 getLastName().equals(that.getLastName()) &&
                 getFriends().equals(that.getFriends());

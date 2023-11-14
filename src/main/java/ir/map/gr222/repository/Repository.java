@@ -53,6 +53,12 @@ public interface Repository<ID, E extends Entity<ID>> {
      * @throws ValidationException      if the entity is not valid.
      */
     Optional<E> update(E entity);
+
+    /**
+     *
+     * @return the number of entries in the repository
+     */
+    int size();
 }
 
 

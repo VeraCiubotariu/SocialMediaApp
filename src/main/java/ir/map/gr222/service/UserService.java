@@ -3,18 +3,19 @@ package ir.map.gr222.service;
 import ir.map.gr222.domain.Friendship;
 import ir.map.gr222.domain.Tuple;
 import ir.map.gr222.domain.User;
-import ir.map.gr222.domain.validators.UserValidator;
 import ir.map.gr222.domain.validators.ValidationException;
-import ir.map.gr222.repository.InMemoryRepository;
+import ir.map.gr222.repository.Repository;
 
+import java.time.Month;
 import java.util.*;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public class UserService {
-    private InMemoryRepository<Long, User> userRepo;
-    private InMemoryRepository<Tuple<Long, Long>, Friendship> friendshipRepo;
-    private UserValidator validator = new UserValidator();
+    private final Repository<Long, User> userRepo;
+    private final Repository<Tuple<Long, Long>, Friendship> friendshipRepo;
 
-    public UserService(InMemoryRepository<Long, User> repo, InMemoryRepository<Tuple<Long, Long>, Friendship> friendshipRepo){
+    public UserService(Repository<Long, User> repo, Repository<Tuple<Long, Long>, Friendship> friendshipRepo){
         this.userRepo = repo;
         this.friendshipRepo = friendshipRepo;
     }
@@ -41,7 +42,8 @@ public class UserService {
     public User deleteUser(Long id){
         Optional<User> u = this.userRepo.findOne(id);
 
-        if(u.isPresent()){
+        // for InMemoryRepo, where we also save the friends list for each user
+    /*    if(u.isPresent()){
             List<User> friends = u.get().getFriends();
             while(!friends.isEmpty()){
                 this.deleteFriend(u.get().getId(), friends.get(0).getId());
@@ -50,9 +52,24 @@ public class UserService {
         //    friends.forEach(x -> deleteFriend(u.get().getId(), x.getId()));
 
             return this.userRepo.delete(id).get();
+        }*/
+
+        if(u.isPresent()){
+            this.deleteFriends(id);
+            return this.userRepo.delete(id).get();
         }
 
         return null;
+    }
+
+    private void deleteFriends(Long id) {
+        Iterable<Friendship> friendships = this.friendshipRepo.findAll();
+
+        for(Friendship friendship:friendships){
+            if(Objects.equals(friendship.getId().getLeft(), id) || Objects.equals(friendship.getId().getRight(), id)){
+                this.friendshipRepo.delete(friendship.getId());
+            }
+        }
     }
 
     /**
@@ -103,7 +120,7 @@ public class UserService {
             return null;
         }
 
-        friendshipRepo.delete(new Tuple<Long, Long>(Long.min(userId, friendId), Long.max(userId, friendId)));
+        friendshipRepo.delete(new Tuple<>(Long.min(userId, friendId), Long.max(userId, friendId)));
 
         friend.get().deleteFriend(user.get());
         return user.get().deleteFriend(friend.get());
@@ -115,6 +132,14 @@ public class UserService {
      */
     public Iterable<User> getAllUsers(){
         return this.userRepo.findAll();
+    }
+
+    /**
+     *
+     * @return the list of friendships in the network
+     */
+    public Iterable<Friendship> getAllFriendships(){
+        return this.friendshipRepo.findAll();
     }
 
     /**
@@ -226,13 +251,11 @@ public class UserService {
 
         List<User> community = new ArrayList<>();
 
-        comVert.forEach(code -> {
-            vertices.forEach((key, val) -> {
-                if(Objects.equals(val, code)){
-                    userRepo.findOne(key).ifPresent(community::add);
-                }
-            });
-        });
+        comVert.forEach(code -> vertices.forEach((key, val) -> {
+            if(Objects.equals(val, code)){
+                userRepo.findOne(key).ifPresent(community::add);
+            }
+        }));
 
         return community;
     }
@@ -254,5 +277,41 @@ public class UserService {
                 getCommunity(i, V, visited, matAd, vertices);
             }
         }
+    }
+
+    /**
+     *
+     * @param userID must not be null
+     * @param monthIndex must be an integer between 1 and 12 (inclusive)
+     * @return the list of friends of the given user made in the given month, each element
+     *         of the list being formatted as 'friend_first_name |friend_last_name |friends_from (local-datetime)
+     * @throws IllegalArgumentException if userID is null or the monthIndex isn't a valid one
+     */
+    public Stream<String> findAllFriendsByMonth(Long userID, int monthIndex){
+        if(userID == null || !(monthIndex >= 1 && monthIndex <= 12)){
+            throw new IllegalArgumentException("invalid data!");
+        }
+
+        Iterable<Friendship> friendships = this.friendshipRepo.findAll();
+
+        return StreamSupport.stream(friendships.spliterator(), false)
+                .filter(x -> (Objects.equals(x.getId().getLeft(), userID) ||
+                        Objects.equals(x.getId().getRight(), userID)) &&
+                        x.getFriendsFrom().getMonth() == Month.of(monthIndex))
+                .map(x -> {
+                    Long friendID = null;
+
+                    if(Objects.equals(x.getId().getLeft(), userID)){
+                        friendID = x.getId().getRight();
+                    }
+
+                    else if(Objects.equals(x.getId().getRight(), userID)){
+                        friendID = x.getId().getLeft();
+                    }
+
+                    Optional<User> friend = this.userRepo.findOne(friendID);
+                    return friend.get().getFirstName() + " |" + friend.get().getLastName() + " |" +
+                            x.getFriendsFrom().toString();
+                });
     }
 }

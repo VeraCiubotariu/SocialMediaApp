@@ -17,8 +17,7 @@ public class Entity<ID> implements Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Entity)) return false;
-        Entity<?> entity = (Entity<?>) o;
+        if (!(o instanceof Entity<?> entity)) return false;
         return getId().equals(entity.getId());
     }
 

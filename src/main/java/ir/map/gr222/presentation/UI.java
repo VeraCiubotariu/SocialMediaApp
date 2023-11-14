@@ -1,13 +1,12 @@
 package ir.map.gr222.presentation;
 
+import ir.map.gr222.domain.Friendship;
 import ir.map.gr222.domain.User;
-import ir.map.gr222.repository.Repository;
 import ir.map.gr222.service.UserService;
 
-import java.security.Provider;
 import java.util.List;
-import java.util.Optional;
 import java.util.Scanner;
+import java.util.stream.Stream;
 
 public class UI {
     private UserService serv;
@@ -21,7 +20,18 @@ public class UI {
         boolean running = true;
 
         while(running){
-            System.out.println("1. Add user\n2. Delete user\n3. Add friend\n4. Delete friend\n5. Show all users\n6. Show the number of communities\n7. Show the most active community\ne. Exit\n");
+            System.out.println("""
+                    1. Add user
+                    2. Delete user
+                    3. Add friend
+                    4. Delete friend
+                    5. Show all users
+                    6. Show the number of communities
+                    7. Show the most active community
+                    8. Show all friendships
+                    9. Show friends by month
+                    e. Exit
+                    """);
             System.out.println("Input your command: ");
             char cmd = sc.next().charAt(0);
             sc.nextLine();
@@ -46,10 +56,16 @@ public class UI {
                     this.printUsers();
                     break;
                 case '6':
-                    this.numberOfCommunitites();
+                    this.numberOfCommunities();
                     break;
                 case '7':
                     this.mostActiveCommunity();
+                    break;
+                case '8':
+                    this.printFriendships();
+                    break;
+                case '9':
+                    this.friendsByMonth();
                     break;
                 default:
                     System.out.println("invalid command!");
@@ -58,13 +74,33 @@ public class UI {
         }
     }
 
+    private void friendsByMonth() {
+        System.out.println("Input the user's ID: ");
+        Long userID = sc.nextLong();
+
+        System.out.println("Input the desired month (integer from 1 to 12): ");
+        int monthIndex = sc.nextInt();
+
+        try{
+            Stream<String> result = this.serv.findAllFriendsByMonth(userID, monthIndex);
+            result.forEach(System.out::println);
+        } catch (Exception e){
+            System.out.println(e.getMessage());
+        }
+    }
+
+    private void printFriendships() {
+        Iterable<Friendship> friendships = this.serv.getAllFriendships();
+        friendships.forEach(System.out::println);
+    }
+
     private void mostActiveCommunity() {
         List<User> community = this.serv.mostActiveCommunity();
         System.out.println("The users of the most active community are:");
         community.forEach(System.out::println);
     }
 
-    private void numberOfCommunitites() {
+    private void numberOfCommunities() {
         int communities = this.serv.getCommunitiesNumber();
         System.out.println("There are a total of " + communities + " communities.");
     }

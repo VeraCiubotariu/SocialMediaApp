@@ -21,6 +21,7 @@ public class UserFileRepository extends AbstractFileRepository<Long, User> {
         return user;
     }
 
+
     @Override
     protected String createEntityAsString(User entity) {
         return entity.getId()+";"+entity.getFirstName()+";"+entity.getLastName();
