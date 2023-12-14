@@ -3,6 +3,7 @@ package ir.map.gr222.sem7.repository;
 import ir.map.gr222.sem7.domain.Entity;
 import ir.map.gr222.sem7.domain.validators.ValidationException;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -22,7 +23,7 @@ public interface Repository<ID, E extends Entity<ID>> {
     /**
      * @return all entities
      */
-    Iterable<E> findAll();
+    List<E> findAll();
 
     /**
      * @param entity entity must be not null

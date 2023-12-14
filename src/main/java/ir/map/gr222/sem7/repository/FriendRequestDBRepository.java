@@ -1,5 +1,6 @@
 package ir.map.gr222.sem7.repository;
 
+import ir.map.gr222.sem7.domain.FriendRequest;
 import ir.map.gr222.sem7.domain.Friendship;
 import ir.map.gr222.sem7.domain.Tuple;
 import ir.map.gr222.sem7.domain.User;
@@ -9,13 +10,13 @@ import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.*;
 
-public class FriendshipDBRepository implements Repository<Tuple<Long, Long>, Friendship> {
+public class FriendRequestDBRepository implements Repository<Tuple<Long, Long>, FriendRequest> {
     private final String url;
     private final String username;
     private final String password;
     private final FriendshipValidator validator;
 
-    public FriendshipDBRepository(String url, String username, String password, FriendshipValidator validator) {
+    public FriendRequestDBRepository(String url, String username, String password, FriendshipValidator validator) {
         this.url = url;
         this.username = username;
         this.password = password;
@@ -23,26 +24,23 @@ public class FriendshipDBRepository implements Repository<Tuple<Long, Long>, Fri
     }
 
     @Override
-    public Optional<Friendship> findOne(Tuple<Long, Long> id) {
+    public Optional<FriendRequest> findOne(Tuple<Long, Long> id) {
         if(id == null){
             throw  new IllegalArgumentException("ID must not be null!");
         }
 
         try(Connection connection = DriverManager.getConnection(url, username, password);
-            PreparedStatement statement = connection.prepareStatement("select * from friendships where friend1_id = ? and friend2_id = ?")
+            PreparedStatement statement = connection.prepareStatement("select * from friend_requests where friend1_id = ? and friend2_id = ?")
         ){
-            long min = Long.min(id.getLeft(), id.getRight());
-            long max = Long.max(id.getLeft(), id.getRight());
-
-            statement.setInt(1, Math.toIntExact(min));
-            statement.setInt(2, Math.toIntExact(max));
+            statement.setInt(1, Math.toIntExact(id.getLeft()));
+            statement.setInt(2, Math.toIntExact(id.getRight()));
 
             ResultSet resultSet = statement.executeQuery();
             if(resultSet.next()){
-                Timestamp date = resultSet.getTimestamp("date");
-                Friendship friendship = new Friendship(id, date.toLocalDateTime());
+                String status = resultSet.getString("status");
+                FriendRequest friendRequest = new FriendRequest(id, status);
 
-                return Optional.of(friendship);
+                return Optional.of(friendRequest);
             }
 
         } catch(SQLException e){
@@ -53,11 +51,11 @@ public class FriendshipDBRepository implements Repository<Tuple<Long, Long>, Fri
     }
 
     @Override
-    public List<Friendship> findAll() {
-        List<Friendship> friendships = new ArrayList<>();
+    public List<FriendRequest> findAll() {
+        List<FriendRequest> friendRequests = new ArrayList<>();
 
         try (Connection connection = DriverManager.getConnection(url, username, password);
-             PreparedStatement statement = connection.prepareStatement("select * from friendships order by date");
+             PreparedStatement statement = connection.prepareStatement("select * from friend_requests order by status");
              ResultSet resultSet = statement.executeQuery()
         ) {
 
@@ -65,28 +63,25 @@ public class FriendshipDBRepository implements Repository<Tuple<Long, Long>, Fri
             {
                 Long id_left = resultSet.getLong("friend1_id");
                 Long id_right = resultSet.getLong("friend2_id");
-                LocalDateTime date = resultSet.getTimestamp("date").toLocalDateTime();
-                Friendship friendship = new Friendship(new Tuple<>(id_left, id_right), date);
-                friendships.add(friendship);
+                String status = resultSet.getString("status");
+                FriendRequest friendRequest = new FriendRequest(new Tuple<>(id_left, id_right), status);
+                friendRequests.add(friendRequest);
             }
-            return friendships;
+            return friendRequests;
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public List<User> getAllFriends(Long userID) {
-        List<User> friends = new ArrayList<>();
+    public List<User> getAllUserPendingFriendRequests(Long userID){
+        List<User> users = new ArrayList<>();
 
         try (Connection connection = DriverManager.getConnection(url, username, password);
-             PreparedStatement statement = connection.prepareStatement("select distinct friendships.friend2_id as id, u.first_name, u.last_name, u.username, u.password from friendships " +
-                     "inner join public.users u on u.id = friendships.friend2_id " +
-                     "where friendships.friend1_id =  " + userID + " " +
-                     "union " +
-                     "select distinct friendships.friend1_id as id, u.first_name, u.last_name, u.username, u.password from friendships " +
-                     "inner join public.users u on u.id = friendships.friend1_id " +
-                     "where friendships.friend2_id = " + userID);
+             PreparedStatement statement = connection.prepareStatement("select f.friend1_id as id, u.first_name, u.last_name, u.username, u.password from friend_requests as f " +
+                     "inner join users u on f.friend1_id = u.id " +
+                     "where f.friend2_id = " + userID + " and f.status = 'pending' " +
+                     "order by u.username;");
              ResultSet resultSet = statement.executeQuery()
         ) {
 
@@ -98,9 +93,9 @@ public class FriendshipDBRepository implements Repository<Tuple<Long, Long>, Fri
                 String usernameU = resultSet.getString("username");
                 String passwordU = resultSet.getString("password");
                 User user = new User(id, firstName, lastName, usernameU, passwordU);
-                friends.add(user);
+                users.add(user);
             }
-            return friends;
+            return users;
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -108,19 +103,19 @@ public class FriendshipDBRepository implements Repository<Tuple<Long, Long>, Fri
     }
 
     @Override
-    public Optional<Friendship> save(Friendship entity) {
+    public Optional<FriendRequest> save(FriendRequest entity) {
         if(entity == null){
             throw new IllegalArgumentException("entity must not be null!");
         }
 
         validator.validate(entity);
 
-        String insertSQL = "insert into friendships(friend1_id, friend2_id, date) values (?, ?, ?)";
+        String insertSQL = "insert into friend_requests(friend1_id, friend2_id, status) values (?, ?, ?)";
         try(Connection con = DriverManager.getConnection(url, username, password);
             PreparedStatement statement = con.prepareStatement(insertSQL)){
             statement.setInt(1, Math.toIntExact(entity.getId().getLeft()));
             statement.setInt(2, Math.toIntExact(entity.getId().getRight()));
-            statement.setTimestamp(3, Timestamp.valueOf(entity.getFriendsFrom()));
+            statement.setString(3, entity.getStatus());
 
             int response = statement.executeUpdate();
             return response == 0? Optional.of(entity) :Optional.empty();
@@ -130,41 +125,41 @@ public class FriendshipDBRepository implements Repository<Tuple<Long, Long>, Fri
     }
 
     @Override
-    public Optional<Friendship> delete(Tuple<Long, Long> id) {
+    public Optional<FriendRequest> delete(Tuple<Long, Long> id) {
         if(id == null){
             throw  new IllegalArgumentException("ID must not be null!");
         }
 
-        Optional<Friendship> friendship = this.findOne(id);
-        if(friendship.isEmpty()){
+        Optional<FriendRequest> friendRequest = this.findOne(id);
+        if(friendRequest.isEmpty()){
             return Optional.empty();
         }
 
-        String deleteSQL = "delete from friendships where friend1_id = ? and friend2_id = ?";
+        String deleteSQL = "delete from friend_requests where friend1_id = ? and friend2_id = ?";
         try(Connection con = DriverManager.getConnection(url, username, password);
             PreparedStatement statement = con.prepareStatement(deleteSQL)){
             statement.setInt(1, Math.toIntExact(id.getLeft()));
             statement.setInt(2, Math.toIntExact(id.getRight()));
 
             int response = statement.executeUpdate();
-            return response == 0? Optional.empty() : friendship;
+            return response == 0? Optional.empty() : friendRequest;
         } catch(SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
     @Override
-    public Optional<Friendship> update(Friendship entity) {
+    public Optional<FriendRequest> update(FriendRequest entity) {
         if(entity == null){
             throw new IllegalArgumentException("entity must not be null!");
         }
 
         validator.validate(entity);
 
-        String deleteSQL = "update friendships set date = ? where friend1_id = ? and friend2_id = ?";
+        String deleteSQL = "update friend_requests set status = ? where friend1_id = ? and friend2_id = ?";
         try(Connection con = DriverManager.getConnection(url, username, password);
             PreparedStatement statement = con.prepareStatement(deleteSQL)){
-            statement.setTimestamp(1, Timestamp.valueOf(entity.getFriendsFrom()));
+            statement.setString(1, entity.getStatus());
             statement.setInt(2, Math.toIntExact(entity.getId().getLeft()));
             statement.setInt(3, Math.toIntExact(entity.getId().getRight()));
 
@@ -178,12 +173,12 @@ public class FriendshipDBRepository implements Repository<Tuple<Long, Long>, Fri
     @Override
     public int size() {
         try (Connection connection = DriverManager.getConnection(url, username, password);
-             PreparedStatement statement = connection.prepareStatement("select count(*) as nr_friendships from friendships");
+             PreparedStatement statement = connection.prepareStatement("select count(*) as nr from friend_requests");
              ResultSet resultSet = statement.executeQuery()
         ) {
 
             resultSet.next();
-            return resultSet.getInt("nr_friendships");
+            return resultSet.getInt("nr");
 
         } catch (SQLException e) {
             throw new RuntimeException(e);

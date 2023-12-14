@@ -1,11 +1,13 @@
 package ir.map.gr222.sem7.gui;
 
 import ir.map.gr222.sem7.domain.validators.FriendshipValidator;
+import ir.map.gr222.sem7.domain.validators.MessageValidator;
 import ir.map.gr222.sem7.domain.validators.UserValidator;
-import ir.map.gr222.sem7.repository.FriendshipDBRepository;
-import ir.map.gr222.sem7.repository.UserDBRepository;
+import ir.map.gr222.sem7.repository.*;
+import ir.map.gr222.sem7.service.MessageService;
 import ir.map.gr222.sem7.service.UserService;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
@@ -14,15 +16,22 @@ import javafx.stage.Stage;
 import java.io.IOException;
 
 public class MainApplication extends Application {
-    UserDBRepository userDBRepository = new UserDBRepository("jdbc:postgresql://localhost:5432/socialnetwork", "postgres", "Geani19011978", new UserValidator());
-    FriendshipDBRepository friendshipDBRepository = new FriendshipDBRepository("jdbc:postgresql://localhost:5432/socialnetwork", "postgres", "Geani19011978", new FriendshipValidator());
-    UserService userService = new UserService(userDBRepository, friendshipDBRepository);
+    String url = "jdbc:postgresql://localhost:5432/socialnetwork";
+    String username = "postgres";
+    String password = "Geani19011978";
+
+    UserDBRepository userDBRepository = new UserDBRepository(url, username, password, new UserValidator());
+    MessageDBRepository messageDBRepository = new MessageDBRepository(url, username, password, new MessageValidator());
+    FriendshipDBRepository friendshipDBRepository = new FriendshipDBRepository(url, username, password, new FriendshipValidator());
+    FriendRequestDBRepository friendRequestDBRepository = new FriendRequestDBRepository(url, username, password, new FriendshipValidator());
+    UserService userService = new UserService(userDBRepository, friendshipDBRepository, friendRequestDBRepository);
+    MessageService messageService = new MessageService(userDBRepository, messageDBRepository);
 
     @Override
     public void start(Stage stage) throws IOException {
 
         initView(stage);
-        stage.setWidth(700);
+        stage.setWidth(570);
         stage.show();
     }
 
@@ -32,13 +41,15 @@ public class MainApplication extends Application {
 
     private void initView(Stage primaryStage) throws IOException {
 
-        FXMLLoader userLoader = new FXMLLoader();
-        userLoader.setLocation(getClass().getResource("/ir/map/gr222/sem7/gui/user-view.fxml"));
-        AnchorPane userLayout = userLoader.load();
+        FXMLLoader loginLoader = new FXMLLoader();
+        loginLoader.setLocation(getClass().getResource("/ir/map/gr222/sem7/gui/views/login-view.fxml"));
+        AnchorPane userLayout = loginLoader.load();
         primaryStage.setScene(new Scene(userLayout));
 
-        UserController userController = userLoader.getController();
-        userController.setService(userService);
+        LoginController loginController = loginLoader.getController();
+        loginController.setService(userService, primaryStage, messageService);
+
+        System.out.println("Am afisat!");
 
     }
 }

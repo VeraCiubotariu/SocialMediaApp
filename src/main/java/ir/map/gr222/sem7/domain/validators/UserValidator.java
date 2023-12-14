@@ -13,6 +13,14 @@ public class UserValidator implements Validator<User> {
         if(entity.getLastName().isEmpty()){
             throw new ValidationException("invalid last name!");
         }
+
+        if(entity.getUsername().isEmpty()){
+            throw new ValidationException("invalid username!");
+        }
+
+        if(entity.getPassword().isEmpty()){
+            throw new ValidationException("invalid password!");
+        }
     }
 }
 

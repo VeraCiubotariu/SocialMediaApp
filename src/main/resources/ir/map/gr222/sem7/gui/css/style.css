@@ -75,3 +75,40 @@
 .table-view .virtual-flow .scroll-bar:horizontal .thumb {
     -fx-background-color:  linear-gradient(to right, #1dbbdd44, #93f9b944);
 }
+
+.tab-pane .tab-content-area {
+
+    /* This is area below the tab where content of tab is */
+
+    -fx-background-color: transparent ;
+
+}
+
+/* To change background opacity of area on which tabs are placed you need to override */
+
+.tab-pane:top *.tab-header-background {
+
+    /* this is area on which tabs are placed */
+
+    -fx-background-color: transparent ;
+
+}
+
+/* To remove padding around tabs */
+
+.tab-pane:top *.tab-header-area {
+
+    -fx-background-insets: 0.0;
+
+    -fx-padding: 0.0em ;
+
+}
+
+/* To change color of text on Tab */
+
+.tab-pane .tab .tab-label {
+
+    -fx-background-color: transparent;
+    -fx-text-fill: #4444ff;
+
+}

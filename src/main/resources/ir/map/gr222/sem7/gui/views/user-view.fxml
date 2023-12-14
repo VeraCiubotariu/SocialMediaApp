@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.*?>
+<?import javafx.scene.shape.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane prefHeight="520.0" prefWidth="700.0" stylesheets="../css/style.css" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ir.map.gr222.sem7.gui.UserController">
+    <children>
+        <Rectangle arcHeight="5.0" arcWidth="5.0" height="542.0" layoutY="-13.0" stroke="TRANSPARENT" strokeType="INSIDE" width="725.0">
+            <fill>
+                <LinearGradient endX="1.0" endY="1.0" startY="1.0">
+                    <stops>
+                        <Stop>
+                            <color>
+                                <Color red="1.0" green="0.8705882430076599" blue="0.3490196168422699" />
+                            </color>
+                        </Stop>
+                        <Stop offset="0.14628382370317836">
+                            <color>
+                                <Color red="1.0" green="0.8705882430076599" blue="0.3490196168422699" />
+                            </color>
+                        </Stop>
+                        <Stop offset="1.0">
+                            <color>
+                                <Color red="0.8117647171020508" green="0.3529411852359772" blue="0.5333333611488342" />
+                            </color>
+                        </Stop>
+                    </stops>
+                </LinearGradient>
+            </fill>
+        </Rectangle>
+      <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#452354" height="122.0" stroke="TRANSPARENT" strokeType="INSIDE" width="725.0" />
+        <AnchorPane layoutY="-9.0" minHeight="0.0" minWidth="0.0" prefHeight="520.0" prefWidth="686.0" style="-fx-background-color: transparent;">
+            <children>
+                <ImageView fitHeight="106.0" fitWidth="174.0" layoutX="14.0" layoutY="14.0" pickOnBounds="true" preserveRatio="true">
+                    <image>
+                        <Image url="@../images/logo.png" />
+                    </image></ImageView>
+            </children>
+        </AnchorPane>
+      <TabPane layoutX="25.0" layoutY="94.0" prefHeight="428.0" prefWidth="693.0" stylesheets="@../css/style.css" tabClosingPolicy="UNAVAILABLE">
+        <tabs>
+          <Tab text="Find People">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="404.0" prefWidth="695.0">
+                     <children>
+                            <TableView fx:id="userTableView" layoutX="14.0" layoutY="14.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="406.0" prefWidth="423.0" stylesheets="@../css/style.css">
+                                <columns>
+                                    <TableColumn fx:id="tableColumnUsername" prefWidth="75.0" text="Username" />
+                                    <TableColumn fx:id="tableColumnFirstName" prefWidth="75.0" text="First Name" />
+                                    <TableColumn fx:id="tableColumnLastName" prefWidth="75.0" text="Last Name" />
+                                </columns>
+                                <columnResizePolicy>
+                                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                                </columnResizePolicy>
+                            </TableView>
+                        <ImageView fitHeight="31.0" fitWidth="28.0" layoutX="481.0" layoutY="49.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../images/add-friend-24.png" />
+                           </image>
+                        </ImageView>
+                        <Button layoutX="509.0" layoutY="50.0" mnemonicParsing="false" onAction="#handleSendFriendRequest" style="-fx-background-color: TRANSPARENT;" stylesheets="@../css/style.css" text="ADD FRIEND">
+                           <font>
+                              <Font name="System Bold" size="12.0" />
+                           </font></Button>
+                     </children></AnchorPane>
+            </content>
+          </Tab>
+          <Tab text="Friend Requests">
+            <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="404.0" prefWidth="695.0">
+                <children>
+                <TableView fx:id="friendReqsTableView" layoutX="14.0" layoutY="14.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="406.0" prefWidth="361.0" stylesheets="@../css/style.css">
+                    <columns>
+                        <TableColumn fx:id="friendReqsTableColumnUsername" prefWidth="75.0" text="Username" />
+                        <TableColumn fx:id="friendReqsTableColumnFirstName" prefWidth="75.0" text="First Name" />
+                        <TableColumn fx:id="friendReqsTableColumnLastName" prefWidth="75.0" text="Last Name" />
+                    </columns>
+                    <columnResizePolicy>
+                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                    </columnResizePolicy>
+                </TableView>
+                    <Button layoutX="509.0" layoutY="50.0" mnemonicParsing="false" onAction="#handleAcceptFriendRequest" style="-fx-background-color: TRANSPARENT;" stylesheets="@../css/style.css" text="ACCEPT">
+                        <font>
+                            <Font name="System Bold" size="12.0" />
+                        </font></Button>
+                    <Button layoutX="511.0" layoutY="91.0" mnemonicParsing="false" onAction="#handleRejectFriendRequest" style="-fx-background-color: TRANSPARENT;" stylesheets="@../css/style.css" text="REJECT">
+                        <font>
+                            <Font name="System Bold" size="12.0" />
+                        </font></Button>
+                </children></AnchorPane>
+            </content>
+          </Tab>
+
+            <Tab text="My Friends">
+                <content>
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="404.0" prefWidth="695.0">
+                    <children>
+                    <TableView fx:id="friendsTableView" layoutX="14.0" layoutY="14.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="406.0" prefWidth="423.0" stylesheets="@../css/style.css">
+                        <columns>
+                            <TableColumn fx:id="friendsTableColumnUsername" prefWidth="75.0" text="Username" />
+                            <TableColumn fx:id="friendsTableColumnFirstName" prefWidth="75.0" text="First Name" />
+                            <TableColumn fx:id="friendsTableColumnLastName" prefWidth="75.0" text="Last Name" />
+                        </columns>
+                        <columnResizePolicy>
+                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                        </columnResizePolicy>
+                    </TableView>
+                    </children></AnchorPane>
+                </content>
+            </Tab>
+
+            <Tab text="Messages">
+                <content>
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="404.0" prefWidth="695.0">
+                        <children>
+                            <TableView fx:id="allUsersTableView" layoutX="14.0" layoutY="14.0" minHeight="-Infinity" minWidth="-Infinity" onMousePressed="#updateMessages" prefHeight="406.0" prefWidth="150.0" stylesheets="@../css/style.css">
+                                <columns>
+                                    <TableColumn fx:id="allUsersTableColumnUsername" prefWidth="265.3999938964844" text="Users" />
+                                </columns>
+                                <columnResizePolicy>
+                                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                                </columnResizePolicy>
+                            </TableView>
+                        <ListView fx:id="messagesListView" layoutX="193.0" layoutY="14.0" prefHeight="322.0" prefWidth="475.0" />
+                        <TextField fx:id="messageTextField" layoutX="193.0" layoutY="347.0" prefHeight="26.0" prefWidth="316.0" />
+                        <Button layoutX="523.0" layoutY="348.0" mnemonicParsing="false" onAction="#handleSendToOne" text="Send" />
+                        <Button layoutX="578.0" layoutY="348.0" mnemonicParsing="false" onAction="#handleSendToMultiple" text="Send Multiple" />
+                        </children></AnchorPane>
+                </content>
+            </Tab>
+        </tabs>
+      </TabPane>
+    </children>
+
+</AnchorPane>

@@ -8,6 +8,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
+import java.sql.SQLException;
 import java.util.Optional;
 
 public class EditUserController {
@@ -15,6 +16,10 @@ public class EditUserController {
     private TextField textFieldFirstName;
     @FXML
     private TextField textFieldLastName;
+    @FXML
+    private TextField textFieldUsername;
+    @FXML
+    private TextField textFieldPassword;
 
     private UserService service;
     Stage dialogStage;
@@ -36,10 +41,12 @@ public class EditUserController {
 
     @FXML
     public void handleSave(){
+        String username = textFieldUsername.getText();
         String firstName = textFieldFirstName.getText();
         String lastName = textFieldLastName.getText();
+        String password = textFieldPassword.getText();
 
-        User m = new User(firstName,lastName);
+        User m = new User(firstName,lastName,username,password);
         if (null == this.user)
             saveUser(m);
         else{
@@ -63,14 +70,15 @@ public class EditUserController {
 
     private void saveUser(User m)
     {
-        // TODO
         try {
             Optional<User> r= this.service.addUser(m);
             if (r.isEmpty())
                 dialogStage.close();
-            MessageAlert.showMessage(null, Alert.AlertType.INFORMATION,"Salvare mesaj","Mesajul a fost salvat");
+            MessageAlert.showMessage(null, Alert.AlertType.INFORMATION,"Saving user","The user was saved");
         } catch (ValidationException e) {
             MessageAlert.showErrorMessage(null,e.getMessage());
+        } catch (RuntimeException re){
+            MessageAlert.showErrorMessage(null,"username already in use");
         }
         dialogStage.close();
     }
@@ -78,12 +86,16 @@ public class EditUserController {
     private void clearFields() {
         textFieldFirstName.setText("");
         textFieldLastName.setText("");
+        textFieldPassword.setText("");
+        textFieldUsername.setText("");
     }
 
     private void setFields(User s)
     {
         textFieldFirstName.setText(s.getFirstName());
         textFieldLastName.setText(s.getLastName());
+        textFieldPassword.setText(s.getPassword());
+        textFieldUsername.setText(s.getUsername());
     }
 
     @FXML

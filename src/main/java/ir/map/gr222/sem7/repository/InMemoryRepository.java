@@ -4,9 +4,7 @@ import ir.map.gr222.sem7.domain.Entity;
 import ir.map.gr222.sem7.domain.validators.ValidationException;
 import ir.map.gr222.sem7.domain.validators.Validator;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class InMemoryRepository<ID, E extends Entity<ID>> implements Repository<ID,E> {
     private final Validator<E> validator;
@@ -25,8 +23,8 @@ public class InMemoryRepository<ID, E extends Entity<ID>> implements Repository<
     }
 
     @Override
-    public Iterable<E> findAll() {
-        return entities.values();
+    public List<E> findAll() {
+        return List.copyOf(entities.values());
     }
 
     @Override

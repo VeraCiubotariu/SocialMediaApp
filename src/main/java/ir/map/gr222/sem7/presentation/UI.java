@@ -112,7 +112,10 @@ public class UI {
         System.out.println("input the user's last name: ");
         String lastName = sc.nextLine();
 
-        User user = new User(firstName, lastName);
+        System.out.println("input the user's username: ");
+        String username = sc.nextLine();
+
+        User user = new User(firstName, lastName, username);
         try{
             if(this.serv.addUser(user).isEmpty()){
                 System.out.println("user added successfully!");

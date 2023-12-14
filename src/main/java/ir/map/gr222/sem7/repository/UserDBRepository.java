@@ -4,9 +4,7 @@ import ir.map.gr222.sem7.domain.User;
 import ir.map.gr222.sem7.domain.validators.UserValidator;
 
 import java.sql.*;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 public class UserDBRepository implements Repository<Long, User> {
 
@@ -36,7 +34,38 @@ public class UserDBRepository implements Repository<Long, User> {
             if(resultSet.next()){
                 String firstName = resultSet.getString("first_name");
                 String lastName = resultSet.getString("last_name");
-                User u = new User(firstName, lastName);
+                String usUsername = resultSet.getString("username");
+                String usPassword = resultSet.getString("password");
+                User u = new User(firstName, lastName, usUsername, usPassword);
+                u.setId(longID);
+                return Optional.of(u);
+            }
+
+        } catch(SQLException e){
+            throw new RuntimeException(e);
+        }
+
+        return Optional.empty();
+    }
+
+    public Optional<User> findOneByUsername(String username_arg) {
+        if(username_arg == null){
+            throw  new IllegalArgumentException("username must not be null!");
+        }
+
+        try(Connection connection = DriverManager.getConnection(url, username, password);
+            PreparedStatement statement = connection.prepareStatement("select * from users where username = ?")
+        ){
+            statement.setString(1, username_arg);
+            ResultSet resultSet = statement.executeQuery();
+            if(resultSet.next()){
+                Long longID = resultSet.getLong("id");
+                String firstName = resultSet.getString("first_name");
+                String lastName = resultSet.getString("last_name");
+                String usUsername = resultSet.getString("username");
+                String usPassword = resultSet.getString("password");
+                System.out.println(longID);
+                User u = new User(firstName, lastName, usUsername, usPassword);
                 u.setId(longID);
                 return Optional.of(u);
             }
@@ -49,11 +78,11 @@ public class UserDBRepository implements Repository<Long, User> {
     }
 
     @Override
-    public Iterable<User> findAll() {
-        Set<User> users = new HashSet<>();
+    public List<User> findAll() {
+        List<User> users = new ArrayList<>();
 
         try (Connection connection = DriverManager.getConnection(url, username, password);
-             PreparedStatement statement = connection.prepareStatement("select * from users order by first_name, last_name");
+             PreparedStatement statement = connection.prepareStatement("select * from users order by username");
              ResultSet resultSet = statement.executeQuery()
         ) {
 
@@ -62,7 +91,9 @@ public class UserDBRepository implements Repository<Long, User> {
                 Long id= resultSet.getLong("id");
                 String firstName=resultSet.getString("first_name");
                 String lastName=resultSet.getString("last_name");
-                User user=new User(firstName,lastName);
+                String usUsername = resultSet.getString("username");
+                String usPassword = resultSet.getString("password");
+                User user = new User(firstName, lastName, usUsername, usPassword);
                 user.setId(id);
                 users.add(user);
 
@@ -83,11 +114,13 @@ public class UserDBRepository implements Repository<Long, User> {
 
         validator.validate(entity);
 
-        String insertSQL = "insert into users(first_name, last_name) values (?, ?)";
+        String insertSQL = "insert into users(first_name, last_name, username, password) values (?, ?, ?, ?)";
         try(Connection con = DriverManager.getConnection(url, username, password);
             PreparedStatement statement = con.prepareStatement(insertSQL)){
             statement.setString(1, entity.getFirstName());
             statement.setString(2, entity.getLastName());
+            statement.setString(3, entity.getUsername());
+            statement.setString(4, entity.getPassword());
 
             int response = statement.executeUpdate();
             return response == 0? Optional.of(entity) :Optional.empty();
@@ -127,12 +160,14 @@ public class UserDBRepository implements Repository<Long, User> {
 
         validator.validate(entity);
 
-        String deleteSQL = "update users set first_name = ?, last_name = ? where id = ?";
+        String deleteSQL = "update users set first_name = ?, last_name = ?, username = ?, password = ? where id = ?";
         try(Connection con = DriverManager.getConnection(url, username, password);
             PreparedStatement statement = con.prepareStatement(deleteSQL)){
             statement.setString(1, entity.getFirstName());
             statement.setString(2, entity.getLastName());
-            statement.setInt(3, Math.toIntExact(entity.getId()));
+            statement.setString(3, entity.getUsername());
+            statement.setString(4, entity.getPassword());
+            statement.setInt(5, Math.toIntExact(entity.getId()));
 
             int response = statement.executeUpdate();
             return response == 0? Optional.empty() : Optional.of(entity);
