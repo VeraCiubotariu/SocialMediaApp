@@ -1,8 +1,9 @@
-package ir.map.gr222.sem7.repository;
+package ir.map.gr222.sem7.repository.FileRepository;
 
 
 import ir.map.gr222.sem7.domain.User;
 import ir.map.gr222.sem7.domain.validators.Validator;
+import ir.map.gr222.sem7.repository.FileRepository.AbstractFileRepository;
 
 import java.util.List;
 

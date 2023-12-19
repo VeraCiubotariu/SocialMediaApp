@@ -11,10 +11,10 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 public class FriendRequestDBRepository implements Repository<Tuple<Long, Long>, FriendRequest> {
-    private final String url;
-    private final String username;
-    private final String password;
-    private final FriendshipValidator validator;
+    protected String url;
+    protected String username;
+    protected String password;
+    private FriendshipValidator validator;
 
     public FriendRequestDBRepository(String url, String username, String password, FriendshipValidator validator) {
         this.url = url;
@@ -96,6 +96,22 @@ public class FriendRequestDBRepository implements Repository<Tuple<Long, Long>, 
                 users.add(user);
             }
             return users;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public int userPendingRequestsSize(Long userID){
+        try (Connection connection = DriverManager.getConnection(url, username, password);
+             PreparedStatement statement = connection.prepareStatement("select count(*) as nr from friend_requests as f " +
+                     "inner join users u on f.friend1_id = u.id " +
+                     "where f.friend2_id = " + userID + " and f.status = 'pending' ");
+             ResultSet resultSet = statement.executeQuery()
+        ) {
+
+            resultSet.next();
+            return resultSet.getInt("nr");
 
         } catch (SQLException e) {
             throw new RuntimeException(e);

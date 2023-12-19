@@ -1,13 +1,11 @@
 package ir.map.gr222.sem7.service;
 
-import ir.map.gr222.sem7.domain.FriendRequest;
-import ir.map.gr222.sem7.domain.Friendship;
-import ir.map.gr222.sem7.domain.Tuple;
-import ir.map.gr222.sem7.domain.User;
+import ir.map.gr222.sem7.domain.*;
 import ir.map.gr222.sem7.domain.exceptions.ServiceException;
 import ir.map.gr222.sem7.domain.validators.ValidationException;
 import ir.map.gr222.sem7.repository.FriendRequestDBRepository;
 import ir.map.gr222.sem7.repository.FriendshipDBRepository;
+import ir.map.gr222.sem7.repository.PagingRepository.*;
 import ir.map.gr222.sem7.repository.UserDBRepository;
 import ir.map.gr222.sem7.utils.events.ChangeEventType;
 import ir.map.gr222.sem7.utils.events.UserChangeEvent;
@@ -20,12 +18,12 @@ import ir.map.gr222.sem7.utils.observer.Observable;
 import ir.map.gr222.sem7.utils.observer.Observer;
 
 public class UserService implements Observable<UserChangeEvent> {
-    private final UserDBRepository userRepo;
-    private final FriendshipDBRepository friendshipRepo;
-    private final FriendRequestDBRepository friendRequestRepo;
+    private final UserDBPagingRepository userRepo;
+    private final FriendshipDBPagingRepository friendshipRepo;
+    private final FriendRequestDBPagingRepository friendRequestRepo;
     private List<Observer<UserChangeEvent>> observers=new ArrayList<>();
 
-    public UserService(UserDBRepository repo, FriendshipDBRepository friendshipRepo, FriendRequestDBRepository friendRequestRepo){
+    public UserService(UserDBPagingRepository repo, FriendshipDBPagingRepository friendshipRepo, FriendRequestDBPagingRepository friendRequestRepo){
         this.userRepo = repo;
         this.friendshipRepo = friendshipRepo;
         this.friendRequestRepo = friendRequestRepo;
@@ -61,6 +59,8 @@ public class UserService implements Observable<UserChangeEvent> {
      *                          or if the password doesn't match
      */
     public User checkLogin(String username, String password){
+        PasswordEncryption passwordEncryption = new PasswordEncryption();
+
         if(password == null){
             throw new IllegalArgumentException("password must not be null");
         }
@@ -68,7 +68,7 @@ public class UserService implements Observable<UserChangeEvent> {
         Optional<User> user = this.findUserByUsername(username);
 
         if(user.isPresent()){
-            if(password.equals(user.get().getPassword())){
+            if(passwordEncryption.encrypt(password).equals(user.get().getPassword())){
                 return user.get();
             }
 
@@ -199,15 +199,23 @@ public class UserService implements Observable<UserChangeEvent> {
             throw new IllegalArgumentException("null user");
         }
 
-        List<User> users = this.userRepo.findAll();
-        users.remove(user);
+        return this.friendshipRepo.getNonFriendUsers(user.getId());
+    }
 
-        List<User> friends = this.getAllFriends(user);
-        for(User friend:friends){
-            users.remove(friend);
+    public Page<User> getNonFriendUsers(Pageable pageable, User user){
+        if(user == null){
+            throw new IllegalArgumentException("null user");
         }
 
-        return users;
+        return this.friendshipRepo.getNonFriendUsers(pageable, user.getId());
+    }
+
+    public int getNonFriendUsersSize(User user){
+        if(user == null){
+            throw new IllegalArgumentException("null user");
+        }
+
+        return this.friendshipRepo.getNonFriendUsersSize(user.getId());
     }
 
     /**
@@ -222,6 +230,22 @@ public class UserService implements Observable<UserChangeEvent> {
         }
 
         return this.friendshipRepo.getAllFriends(user.getId());
+    }
+
+    public Page<User> getAllFriends(Pageable pageable, User user){
+        if(user == null){
+            throw new IllegalArgumentException("null user");
+        }
+
+        return this.friendshipRepo.getAllFriends(pageable, user.getId());
+    }
+
+    public int getAllFriendsSize(User user){
+        if(user == null){
+            throw new IllegalArgumentException("null user");
+        }
+
+        return this.friendshipRepo.getAllFriendsSize(user.getId());
     }
 
     /**
@@ -340,6 +364,22 @@ public class UserService implements Observable<UserChangeEvent> {
         }
 
         return this.friendRequestRepo.getAllUserPendingFriendRequests(user.getId());
+    }
+
+    public Page<User> getAllPendingUserRequests(Pageable pageable, User user){
+        if(user == null){
+            throw new IllegalArgumentException("user must not be null!");
+        }
+
+        return this.friendRequestRepo.getAllUserPendingFriendRequests(pageable, user.getId());
+    }
+
+    public int getPendingUserRequestsSize(User user){
+        if(user == null){
+            throw new IllegalArgumentException("user must not be null!");
+        }
+
+        return this.friendRequestRepo.userPendingRequestsSize(user.getId());
     }
 
     /**

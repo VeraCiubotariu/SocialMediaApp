@@ -1,5 +1,6 @@
 package ir.map.gr222.sem7.repository;
 
+import ir.map.gr222.sem7.domain.PasswordEncryption;
 import ir.map.gr222.sem7.domain.User;
 import ir.map.gr222.sem7.domain.validators.UserValidator;
 
@@ -8,16 +9,18 @@ import java.util.*;
 
 public class UserDBRepository implements Repository<Long, User> {
 
-    private final String url;
-    private final String username;
-    private final String password;
+    protected final String url;
+    protected final String username;
+    protected final String password;
     private final UserValidator validator;
+    private PasswordEncryption passwordEncryption;
 
-    public UserDBRepository(String url, String username, String password, UserValidator validator) {
+    public UserDBRepository(String url, String username, String password, UserValidator validator, PasswordEncryption passwordEncryption) {
         this.url = url;
         this.username = username;
         this.password = password;
         this.validator = validator;
+        this.passwordEncryption = passwordEncryption;
     }
 
     @Override
@@ -120,7 +123,7 @@ public class UserDBRepository implements Repository<Long, User> {
             statement.setString(1, entity.getFirstName());
             statement.setString(2, entity.getLastName());
             statement.setString(3, entity.getUsername());
-            statement.setString(4, entity.getPassword());
+            statement.setString(4, passwordEncryption.encrypt(entity.getPassword()));
 
             int response = statement.executeUpdate();
             return response == 0? Optional.of(entity) :Optional.empty();
@@ -166,7 +169,7 @@ public class UserDBRepository implements Repository<Long, User> {
             statement.setString(1, entity.getFirstName());
             statement.setString(2, entity.getLastName());
             statement.setString(3, entity.getUsername());
-            statement.setString(4, entity.getPassword());
+            statement.setString(4, entity.getPassword());     // TODO: aici tre sa encriptez daca introduc funct. de schimbare parola
             statement.setInt(5, Math.toIntExact(entity.getId()));
 
             int response = statement.executeUpdate();

@@ -47,7 +47,7 @@
             <content>
               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="404.0" prefWidth="695.0">
                      <children>
-                            <TableView fx:id="userTableView" layoutX="14.0" layoutY="14.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="406.0" prefWidth="423.0" stylesheets="@../css/style.css">
+                            <TableView fx:id="userTableView" layoutX="14.0" layoutY="14.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="269.0" prefWidth="362.0" stylesheets="@../css/style.css">
                                 <columns>
                                     <TableColumn fx:id="tableColumnUsername" prefWidth="75.0" text="Username" />
                                     <TableColumn fx:id="tableColumnFirstName" prefWidth="75.0" text="First Name" />
@@ -57,15 +57,18 @@
                                     <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                                 </columnResizePolicy>
                             </TableView>
-                        <ImageView fitHeight="31.0" fitWidth="28.0" layoutX="481.0" layoutY="49.0" pickOnBounds="true" preserveRatio="true">
+                         <Pagination fx:id="usersPagination" layoutX="25.0" layoutY="20.0" prefHeight="349.0" prefWidth="458.0" />
+                        <ImageView fitHeight="31.0" fitWidth="28.0" layoutX="528.0" layoutY="49.0" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@../images/add-friend-24.png" />
                            </image>
                         </ImageView>
-                        <Button layoutX="509.0" layoutY="50.0" mnemonicParsing="false" onAction="#handleSendFriendRequest" style="-fx-background-color: TRANSPARENT;" stylesheets="@../css/style.css" text="ADD FRIEND">
+                        <Button layoutX="556.0" layoutY="50.0" mnemonicParsing="false" onAction="#handleSendFriendRequest" prefHeight="26.0" prefWidth="91.0" style="-fx-background-color: TRANSPARENT;" stylesheets="@../css/style.css" text="ADD FRIEND">
                            <font>
                               <Font name="System Bold" size="12.0" />
                            </font></Button>
+                        <TextField fx:id="IPPUsersText" layoutX="617.0" layoutY="327.0" onAction="#handleIPPTextChanged" prefHeight="25.0" prefWidth="33.0" promptText="10" />
+                        <Label layoutX="525.0" layoutY="331.0" prefHeight="18.0" prefWidth="84.0" text="Items per page" />
                      </children></AnchorPane>
             </content>
           </Tab>
@@ -73,7 +76,7 @@
             <content>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="404.0" prefWidth="695.0">
                 <children>
-                <TableView fx:id="friendReqsTableView" layoutX="14.0" layoutY="14.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="406.0" prefWidth="361.0" stylesheets="@../css/style.css">
+                <TableView fx:id="friendReqsTableView" layoutX="14.0" layoutY="14.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="269.0" prefWidth="362.0" stylesheets="@../css/style.css">
                     <columns>
                         <TableColumn fx:id="friendReqsTableColumnUsername" prefWidth="75.0" text="Username" />
                         <TableColumn fx:id="friendReqsTableColumnFirstName" prefWidth="75.0" text="First Name" />
@@ -83,14 +86,17 @@
                         <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                     </columnResizePolicy>
                 </TableView>
-                    <Button layoutX="509.0" layoutY="50.0" mnemonicParsing="false" onAction="#handleAcceptFriendRequest" style="-fx-background-color: TRANSPARENT;" stylesheets="@../css/style.css" text="ACCEPT">
+                    <Button layoutX="537.0" layoutY="53.0" mnemonicParsing="false" onAction="#handleAcceptFriendRequest" prefHeight="28.0" prefWidth="95.0" style="-fx-background-color: TRANSPARENT;" stylesheets="@../css/style.css" text="ACCEPT">
                         <font>
                             <Font name="System Bold" size="12.0" />
                         </font></Button>
-                    <Button layoutX="511.0" layoutY="91.0" mnemonicParsing="false" onAction="#handleRejectFriendRequest" style="-fx-background-color: TRANSPARENT;" stylesheets="@../css/style.css" text="REJECT">
+                    <Button layoutX="552.0" layoutY="92.0" mnemonicParsing="false" onAction="#handleRejectFriendRequest" prefHeight="29.0" prefWidth="65.0" style="-fx-background-color: TRANSPARENT;" stylesheets="@../css/style.css" text="REJECT">
                         <font>
                             <Font name="System Bold" size="12.0" />
                         </font></Button>
+                        <Pagination fx:id="friendRequestPagination" layoutX="25.0" layoutY="20.0" prefHeight="349.0" prefWidth="458.0" />
+                    <TextField fx:id="IPPRequestsText" layoutX="617.0" layoutY="327.0" onAction="#handleIPPTextChanged" prefHeight="25.0" prefWidth="33.0" promptText="10" />
+                    <Label layoutX="525.0" layoutY="331.0" prefHeight="18.0" prefWidth="84.0" text="Items per page" />
                 </children></AnchorPane>
             </content>
           </Tab>
@@ -99,7 +105,7 @@
                 <content>
                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="404.0" prefWidth="695.0">
                     <children>
-                    <TableView fx:id="friendsTableView" layoutX="14.0" layoutY="14.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="406.0" prefWidth="423.0" stylesheets="@../css/style.css">
+                    <TableView fx:id="friendsTableView" layoutX="14.0" layoutY="14.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="269.0" prefWidth="362.0" stylesheets="@../css/style.css">
                         <columns>
                             <TableColumn fx:id="friendsTableColumnUsername" prefWidth="75.0" text="Username" />
                             <TableColumn fx:id="friendsTableColumnFirstName" prefWidth="75.0" text="First Name" />
@@ -109,6 +115,9 @@
                             <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                         </columnResizePolicy>
                     </TableView>
+                        <Pagination fx:id="friendsPagination" layoutX="25.0" layoutY="20.0" prefHeight="349.0" prefWidth="458.0" />
+                        <TextField fx:id="IPPFriendsText" layoutX="617.0" layoutY="327.0" onAction="#handleIPPTextChanged" prefHeight="25.0" prefWidth="33.0" promptText="10" />
+                        <Label layoutX="525.0" layoutY="331.0" prefHeight="18.0" prefWidth="84.0" text="Items per page" />
                     </children></AnchorPane>
                 </content>
             </Tab>
@@ -117,7 +126,7 @@
                 <content>
                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="404.0" prefWidth="695.0">
                         <children>
-                            <TableView fx:id="allUsersTableView" layoutX="14.0" layoutY="14.0" minHeight="-Infinity" minWidth="-Infinity" onMousePressed="#updateMessages" prefHeight="406.0" prefWidth="150.0" stylesheets="@../css/style.css">
+                            <TableView fx:id="allUsersTableView" layoutX="14.0" layoutY="14.0" minHeight="-Infinity" minWidth="-Infinity" onMousePressed="#updateMessages" prefHeight="361.0" prefWidth="150.0" stylesheets="@../css/style.css">
                                 <columns>
                                     <TableColumn fx:id="allUsersTableColumnUsername" prefWidth="265.3999938964844" text="Users" />
                                 </columns>

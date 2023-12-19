@@ -10,10 +10,10 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 public class FriendshipDBRepository implements Repository<Tuple<Long, Long>, Friendship> {
-    private final String url;
-    private final String username;
-    private final String password;
-    private final FriendshipValidator validator;
+    protected String url;
+    protected String username;
+    protected String password;
+    private FriendshipValidator validator;
 
     public FriendshipDBRepository(String url, String username, String password, FriendshipValidator validator) {
         this.url = url;
@@ -101,6 +101,85 @@ public class FriendshipDBRepository implements Repository<Tuple<Long, Long>, Fri
                 friends.add(user);
             }
             return friends;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public int getAllFriendsSize(Long userID) {
+        List<User> friends = new ArrayList<>();
+
+        try (Connection connection = DriverManager.getConnection(url, username, password);
+             PreparedStatement statement = connection.prepareStatement("select count(*) as nr from (" +
+                     "select distinct friendships.friend2_id as id, u.first_name, u.last_name, u.username, u.password from friendships " +
+                     "inner join public.users u on u.id = friendships.friend2_id " +
+                     "where friendships.friend1_id =  " + userID + " " +
+                     "union " +
+                     "select distinct friendships.friend1_id as id, u.first_name, u.last_name, u.username, u.password from friendships " +
+                     "inner join public.users u on u.id = friendships.friend1_id " +
+                     "where friendships.friend2_id = " + userID + ")");
+             ResultSet resultSet = statement.executeQuery()
+        ) {
+
+            resultSet.next();
+            return resultSet.getInt("nr");
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<User> getNonFriendUsers(Long userID){
+        List<User> users = new ArrayList<>();
+
+        try (Connection connection = DriverManager.getConnection(url, username, password);
+             PreparedStatement statement = connection.prepareStatement("select * from users where id != " + userID + " except (" +
+                     "select distinct friendships.friend2_id as id, u.first_name, u.last_name, u.username, u.password from friendships " +
+                     "inner join public.users u on u.id = friendships.friend2_id " +
+                     "where friendships.friend1_id =  " + userID +
+                     " union " +
+                     "select distinct friendships.friend1_id as id, u.first_name, u.last_name, u.username, u.password from friendships " +
+                     "inner join public.users u on u.id = friendships.friend1_id " +
+                     "where friendships.friend2_id = " + userID + " )");
+             ResultSet resultSet = statement.executeQuery()
+        ) {
+
+            while (resultSet.next())
+            {
+                Long id = resultSet.getLong("id");
+                String firstName = resultSet.getString("first_name");
+                String lastName = resultSet.getString("last_name");
+                String usernameU = resultSet.getString("username");
+                String passwordU = resultSet.getString("password");
+                User user = new User(id, firstName, lastName, usernameU, passwordU);
+                users.add(user);
+            }
+            return users;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public int getNonFriendUsersSize(Long userID){
+        List<User> users = new ArrayList<>();
+
+        try (Connection connection = DriverManager.getConnection(url, username, password);
+             PreparedStatement statement = connection.prepareStatement("select count(*) as nr from (" +
+                     "select * from users where id != " + userID + " except (" +
+                     "select distinct friendships.friend2_id as id, u.first_name, u.last_name, u.username, u.password from friendships " +
+                     "inner join public.users u on u.id = friendships.friend2_id " +
+                     "where friendships.friend1_id =  " + userID +
+                     " union " +
+                     "select distinct friendships.friend1_id as id, u.first_name, u.last_name, u.username, u.password from friendships " +
+                     "inner join public.users u on u.id = friendships.friend1_id " +
+                     "where friendships.friend2_id = " + userID + " ))");
+             ResultSet resultSet = statement.executeQuery()
+        ) {
+
+            resultSet.next();
+            return resultSet.getInt("nr");
 
         } catch (SQLException e) {
             throw new RuntimeException(e);

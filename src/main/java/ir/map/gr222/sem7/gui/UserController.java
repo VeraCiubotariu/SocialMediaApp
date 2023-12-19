@@ -5,6 +5,8 @@ import ir.map.gr222.sem7.controller.UserSelectionController;
 import ir.map.gr222.sem7.domain.FriendRequest;
 import ir.map.gr222.sem7.domain.Message;
 import ir.map.gr222.sem7.domain.User;
+import ir.map.gr222.sem7.repository.PagingRepository.Pageable;
+import ir.map.gr222.sem7.repository.PagingRepository.PageableImplementation;
 import ir.map.gr222.sem7.service.MessageService;
 import ir.map.gr222.sem7.service.UserService;
 import ir.map.gr222.sem7.utils.events.UserChangeEvent;
@@ -19,6 +21,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
@@ -72,10 +75,24 @@ public class UserController implements Observer<UserChangeEvent>  {
     ListView<Message> messagesListView;
 
     @FXML
+    Pagination friendRequestPagination;
+    @FXML
+    Pagination friendsPagination;
+    @FXML
+    Pagination usersPagination;
+
+    @FXML
     TextField messageTextField;
 
     private UserService service;
     private MessageService messageService;
+
+    @FXML
+    TextField IPPUsersText;
+    @FXML
+    TextField IPPFriendsText;
+    @FXML
+    TextField IPPRequestsText;
 
     User currentUser;
 
@@ -116,11 +133,10 @@ public class UserController implements Observer<UserChangeEvent>  {
             @Override
             public ListCell<Message> call(ListView<Message> param) {
                 return new ListCell<>() {
-                    private User recipient = allUsersTableView.getSelectionModel().getSelectedItem();
-
                     @Override
                     protected void updateItem(Message message, boolean empty) {
                         super.updateItem(message, empty);
+                        User recipient = allUsersTableView.getSelectionModel().getSelectedItem();
                         if (message == null || empty) {
                             setText(null);
                         } else {
@@ -136,6 +152,8 @@ public class UserController implements Observer<UserChangeEvent>  {
         });
 
         messagesListView.setItems(messagesModel);
+
+
     }
 
     private void initModel() {
@@ -154,6 +172,55 @@ public class UserController implements Observer<UserChangeEvent>  {
         allUsersModel.setAll(allUsers);
 
         this.updateMessages(null);
+        this.initPagination();
+    }
+
+    private void initPagination(){
+        this.setPaginationPageCount(friendRequestPagination, this.service.getPendingUserRequestsSize(this.currentUser), this.itemsPerPage(IPPRequestsText));
+
+        friendRequestPagination.setPageFactory((pageIndex) -> {
+            Pageable pageable = new PageableImplementation(pageIndex, this.itemsPerPage(IPPRequestsText));
+            this.friendReqsModel.setAll(service.getAllPendingUserRequests(pageable, this.currentUser).getContent().toList());
+            return new VBox(this.friendReqsTableView);
+        });
+
+        this.setPaginationPageCount(friendsPagination, this.service.getAllFriendsSize(this.currentUser), this.itemsPerPage(IPPFriendsText));
+
+        friendsPagination.setPageFactory((pageIndex) -> {
+            Pageable pageable = new PageableImplementation(pageIndex, this.itemsPerPage(IPPFriendsText));
+            this.friendsModel.setAll(service.getAllFriends(pageable, this.currentUser).getContent().toList());
+            return new VBox(this.friendsTableView);
+        });
+
+        this.setPaginationPageCount(usersPagination, this.service.getNonFriendUsersSize(this.currentUser), this.itemsPerPage(IPPUsersText));
+
+        usersPagination.setPageFactory((pageIndex) -> {
+            Pageable pageable = new PageableImplementation(pageIndex, this.itemsPerPage(IPPUsersText));
+            this.usersModel.setAll(service.getNonFriendUsers(pageable, this.currentUser).getContent().toList());
+            return new VBox(this.userTableView);
+        });
+    }
+
+    private void setPaginationPageCount(Pagination pagination, int entriesCount, int itemsPage){
+        if(entriesCount%itemsPage == 0){
+            pagination.setPageCount(entriesCount/itemsPage);
+        }
+
+        else{
+            pagination.setPageCount(entriesCount/itemsPage + 1);
+        }
+    }
+
+    private int itemsPerPage(TextField IPPTextField){
+        if(IPPTextField.getText().isEmpty() || Integer.parseUnsignedInt(IPPTextField.getText()) <= 0){
+            return 10;
+        }
+
+        else return Integer.parseUnsignedInt(IPPTextField.getText());
+    }
+
+    public void handleIPPTextChanged(){
+        this.initPagination();
     }
 
     @Override

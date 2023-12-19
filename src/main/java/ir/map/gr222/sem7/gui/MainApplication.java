@@ -1,9 +1,13 @@
 package ir.map.gr222.sem7.gui;
 
+import ir.map.gr222.sem7.domain.PasswordEncryption;
 import ir.map.gr222.sem7.domain.validators.FriendshipValidator;
 import ir.map.gr222.sem7.domain.validators.MessageValidator;
 import ir.map.gr222.sem7.domain.validators.UserValidator;
 import ir.map.gr222.sem7.repository.*;
+import ir.map.gr222.sem7.repository.PagingRepository.FriendRequestDBPagingRepository;
+import ir.map.gr222.sem7.repository.PagingRepository.FriendshipDBPagingRepository;
+import ir.map.gr222.sem7.repository.PagingRepository.UserDBPagingRepository;
 import ir.map.gr222.sem7.service.MessageService;
 import ir.map.gr222.sem7.service.UserService;
 import javafx.application.Application;
@@ -20,10 +24,10 @@ public class MainApplication extends Application {
     String username = "postgres";
     String password = "Geani19011978";
 
-    UserDBRepository userDBRepository = new UserDBRepository(url, username, password, new UserValidator());
+    UserDBPagingRepository userDBRepository = new UserDBPagingRepository(url, username, password, new UserValidator(), new PasswordEncryption());
     MessageDBRepository messageDBRepository = new MessageDBRepository(url, username, password, new MessageValidator());
-    FriendshipDBRepository friendshipDBRepository = new FriendshipDBRepository(url, username, password, new FriendshipValidator());
-    FriendRequestDBRepository friendRequestDBRepository = new FriendRequestDBRepository(url, username, password, new FriendshipValidator());
+    FriendshipDBPagingRepository friendshipDBRepository = new FriendshipDBPagingRepository(url, username, password, new FriendshipValidator());
+    FriendRequestDBPagingRepository friendRequestDBRepository = new FriendRequestDBPagingRepository(url, username, password, new FriendshipValidator());
     UserService userService = new UserService(userDBRepository, friendshipDBRepository, friendRequestDBRepository);
     MessageService messageService = new MessageService(userDBRepository, messageDBRepository);
 
