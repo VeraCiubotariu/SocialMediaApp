@@ -35,6 +35,12 @@ public class Main {
         page.getContent().forEach(System.out::println);*/
 
         PasswordEncryption passwordEncryption = new PasswordEncryption();
-        System.out.println(passwordEncryption.encrypt("a"));
+        System.out.println(passwordEncryption.encrypt("admin"));
+
+      /*  List<User> users = service.getAllUsers();
+        for (User user : users) {
+            user.setPassword(passwordEncryption.encrypt(user.getPassword()));
+            service.updateUser(user);
+        }*/
     }
 }

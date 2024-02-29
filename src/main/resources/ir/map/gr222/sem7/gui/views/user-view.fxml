@@ -39,6 +39,7 @@
                     <image>
                         <Image url="@../images/logo.png" />
                     </image></ImageView>
+                <TextField fx:id="IPPMessagesText" layoutX="660.0" layoutY="93.0" onAction="#handleIPPTextChanged" prefHeight="25.0" prefWidth="33.0" promptText="10" />
             </children>
         </AnchorPane>
       <TabPane layoutX="25.0" layoutY="94.0" prefHeight="428.0" prefWidth="693.0" stylesheets="@../css/style.css" tabClosingPolicy="UNAVAILABLE">
@@ -135,10 +136,23 @@
                                 </columnResizePolicy>
                             </TableView>
                         <ListView fx:id="messagesListView" layoutX="193.0" layoutY="14.0" prefHeight="322.0" prefWidth="475.0" />
-                        <TextField fx:id="messageTextField" layoutX="193.0" layoutY="347.0" prefHeight="26.0" prefWidth="316.0" />
+                        <TextField fx:id="messageTextField" layoutX="193.0" layoutY="347.0" onAction="#handleSendToOne" prefHeight="26.0" prefWidth="316.0" />
                         <Button layoutX="523.0" layoutY="348.0" mnemonicParsing="false" onAction="#handleSendToOne" text="Send" />
                         <Button layoutX="578.0" layoutY="348.0" mnemonicParsing="false" onAction="#handleSendToMultiple" text="Send Multiple" />
+                            <Pagination fx:id="messagesPagination" layoutX="192.0" layoutY="14.0" prefHeight="322.0" prefWidth="477.0" />
                         </children></AnchorPane>
+                </content>
+            </Tab>
+
+            <Tab text="Change password">
+                <content>
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="404.0" prefWidth="695.0">
+                     <children>
+                        <TextField fx:id="newPasswordText" layoutX="266.0" layoutY="188.0" prefHeight="26.0" prefWidth="191.0" />
+                        <Label layoutX="149.0" layoutY="193.0" prefHeight="18.0" prefWidth="116.0" text="New Password" />
+                        <Button fx:id="changePasswordButton" layoutX="497.0" layoutY="190.0" mnemonicParsing="false" onAction="#changePassword" text="Apply" />
+                        <Label fx:id="passwordStatusLabel" layoutX="149.0" layoutY="130.0" prefHeight="18.0" prefWidth="290.0" text="Password must contain at least 8 characters." />
+                     </children></AnchorPane>
                 </content>
             </Tab>
         </tabs>

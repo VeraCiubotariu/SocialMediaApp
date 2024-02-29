@@ -169,7 +169,7 @@ public class UserDBRepository implements Repository<Long, User> {
             statement.setString(1, entity.getFirstName());
             statement.setString(2, entity.getLastName());
             statement.setString(3, entity.getUsername());
-            statement.setString(4, entity.getPassword());     // TODO: aici tre sa encriptez daca introduc funct. de schimbare parola
+            statement.setString(4, passwordEncryption.encrypt(entity.getPassword()));
             statement.setInt(5, Math.toIntExact(entity.getId()));
 
             int response = statement.executeUpdate();

@@ -5,6 +5,7 @@ import ir.map.gr222.sem7.controller.UserSelectionController;
 import ir.map.gr222.sem7.domain.FriendRequest;
 import ir.map.gr222.sem7.domain.Message;
 import ir.map.gr222.sem7.domain.User;
+import ir.map.gr222.sem7.repository.PagingRepository.Page;
 import ir.map.gr222.sem7.repository.PagingRepository.Pageable;
 import ir.map.gr222.sem7.repository.PagingRepository.PageableImplementation;
 import ir.map.gr222.sem7.service.MessageService;
@@ -80,9 +81,16 @@ public class UserController implements Observer<UserChangeEvent>  {
     Pagination friendsPagination;
     @FXML
     Pagination usersPagination;
+    @FXML
+    Pagination messagesPagination;
 
     @FXML
     TextField messageTextField;
+
+    @FXML
+    TextField newPasswordText;
+    @FXML
+    Button changePasswordButton;
 
     private UserService service;
     private MessageService messageService;
@@ -93,6 +101,10 @@ public class UserController implements Observer<UserChangeEvent>  {
     TextField IPPFriendsText;
     @FXML
     TextField IPPRequestsText;
+    @FXML
+    TextField IPPMessagesText;
+    @FXML
+    Label passwordStatusLabel;
 
     User currentUser;
 
@@ -199,6 +211,8 @@ public class UserController implements Observer<UserChangeEvent>  {
             this.usersModel.setAll(service.getNonFriendUsers(pageable, this.currentUser).getContent().toList());
             return new VBox(this.userTableView);
         });
+
+        this.updateMessages(null);
     }
 
     private void setPaginationPageCount(Pagination pagination, int entriesCount, int itemsPage){
@@ -297,6 +311,7 @@ public class UserController implements Observer<UserChangeEvent>  {
             try {
                 Long recipientID = recipient.getId();
                 this.messageService.sendMessage(new Message(this.currentUser.getId(), List.of(recipientID), messageText, LocalDateTime.now()));
+                this.messageTextField.clear();
             } catch (Exception e){
                 MessageAlert.showErrorMessage(null,e.getMessage());
             }
@@ -340,7 +355,35 @@ public class UserController implements Observer<UserChangeEvent>  {
     public void updateMessages(MouseEvent mouseEvent) {
         User recipientUser = this.allUsersTableView.getSelectionModel().getSelectedItem();
         if(recipientUser != null){
-            messagesModel.setAll(messageService.getUserMessasges(this.currentUser.getId(), recipientUser.getId()));
+            this.setPaginationPageCount(messagesPagination, this.messageService.getUserMessasges(this.currentUser.getId(), recipientUser.getId()).size(), this.itemsPerPage(IPPMessagesText));
+
+            usersPagination.setPageFactory((pageIndex) -> {
+                Pageable pageable = new PageableImplementation(pageIndex, this.itemsPerPage(IPPUsersText));
+                this.usersModel.setAll(service.getNonFriendUsers(pageable, this.currentUser).getContent().toList());
+                return new VBox(this.userTableView);
+            });
+
+            messagesPagination.setPageFactory((pageIndex) -> {
+                Pageable pageable = new PageableImplementation(pageIndex, this.itemsPerPage(IPPMessagesText));
+                this.messagesModel.setAll(messageService.getUserMessages(pageable, this.currentUser.getId(), recipientUser.getId()).getContent().toList());
+                return new VBox(this.messagesListView);
+            });
         }
+    }
+
+    public void changePassword(ActionEvent actionEvent) {
+        this.passwordStatusLabel.setText("Changing password...");
+
+        User newUser = this.currentUser;
+        newUser.setPassword(this.newPasswordText.getText());
+
+        try{
+            this.service.updateUser(newUser);
+            MessageAlert.showMessage(null, Alert.AlertType.INFORMATION, "Password change", "password was successfully changed");
+        } catch (Exception e){
+            MessageAlert.showErrorMessage(null,e.getMessage());
+        }
+
+        this.passwordStatusLabel.setText("Password must contain at least 8 characters.");
     }
 }

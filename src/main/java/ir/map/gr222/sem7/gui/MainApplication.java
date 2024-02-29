@@ -7,6 +7,7 @@ import ir.map.gr222.sem7.domain.validators.UserValidator;
 import ir.map.gr222.sem7.repository.*;
 import ir.map.gr222.sem7.repository.PagingRepository.FriendRequestDBPagingRepository;
 import ir.map.gr222.sem7.repository.PagingRepository.FriendshipDBPagingRepository;
+import ir.map.gr222.sem7.repository.PagingRepository.MessageDBPagingRepository;
 import ir.map.gr222.sem7.repository.PagingRepository.UserDBPagingRepository;
 import ir.map.gr222.sem7.service.MessageService;
 import ir.map.gr222.sem7.service.UserService;
@@ -25,7 +26,7 @@ public class MainApplication extends Application {
     String password = "Geani19011978";
 
     UserDBPagingRepository userDBRepository = new UserDBPagingRepository(url, username, password, new UserValidator(), new PasswordEncryption());
-    MessageDBRepository messageDBRepository = new MessageDBRepository(url, username, password, new MessageValidator());
+    MessageDBPagingRepository messageDBRepository = new MessageDBPagingRepository(url, username, password, new MessageValidator());
     FriendshipDBPagingRepository friendshipDBRepository = new FriendshipDBPagingRepository(url, username, password, new FriendshipValidator());
     FriendRequestDBPagingRepository friendRequestDBRepository = new FriendRequestDBPagingRepository(url, username, password, new FriendshipValidator());
     UserService userService = new UserService(userDBRepository, friendshipDBRepository, friendRequestDBRepository);

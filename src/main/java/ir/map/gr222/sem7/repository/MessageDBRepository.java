@@ -11,9 +11,9 @@ import java.util.List;
 import java.util.Optional;
 
 public class MessageDBRepository implements Repository<Long, Message> {
-    private final String url;
-    private final String username;
-    private final String password;
+    protected String url;
+    protected String username;
+    protected String password;
     private final MessageValidator messageValidator;
 
     public MessageDBRepository(String url, String username, String password, MessageValidator messageValidator) {

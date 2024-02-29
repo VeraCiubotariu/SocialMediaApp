@@ -3,6 +3,9 @@ package ir.map.gr222.sem7.service;
 import ir.map.gr222.sem7.domain.Message;
 import ir.map.gr222.sem7.domain.User;
 import ir.map.gr222.sem7.repository.MessageDBRepository;
+import ir.map.gr222.sem7.repository.PagingRepository.MessageDBPagingRepository;
+import ir.map.gr222.sem7.repository.PagingRepository.Page;
+import ir.map.gr222.sem7.repository.PagingRepository.Pageable;
 import ir.map.gr222.sem7.repository.UserDBRepository;
 import ir.map.gr222.sem7.utils.events.ChangeEventType;
 import ir.map.gr222.sem7.utils.events.UserChangeEvent;
@@ -15,10 +18,10 @@ import java.util.Optional;
 
 public class MessageService implements Observable<UserChangeEvent> {
     UserDBRepository userDBRepository;
-    MessageDBRepository messageDBRepository;
+    MessageDBPagingRepository messageDBRepository;
     private List<Observer<UserChangeEvent>> observers=new ArrayList<>();
 
-    public MessageService(UserDBRepository userDBRepository, MessageDBRepository messageDBRepository) {
+    public MessageService(UserDBRepository userDBRepository, MessageDBPagingRepository messageDBRepository) {
         this.userDBRepository = userDBRepository;
         this.messageDBRepository = messageDBRepository;
     }
@@ -33,6 +36,10 @@ public class MessageService implements Observable<UserChangeEvent> {
 
     public List<Message> getUserMessasges(Long userFromID, Long userToID){
         return this.messageDBRepository.findAllByUser(userFromID, userToID);
+    }
+
+    public Page<Message> getUserMessages(Pageable pageable, Long userFromID, Long userToID){
+        return this.messageDBRepository.findAllByUser(pageable, userFromID, userToID);
     }
 
     @Override

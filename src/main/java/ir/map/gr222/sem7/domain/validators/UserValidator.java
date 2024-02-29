@@ -18,8 +18,8 @@ public class UserValidator implements Validator<User> {
             throw new ValidationException("invalid username!");
         }
 
-        if(entity.getPassword().isEmpty()){
-            throw new ValidationException("invalid password!");
+        if(entity.getPassword().length() < 8){
+            throw new ValidationException("password must contain at least 8 characters!");
         }
     }
 }
